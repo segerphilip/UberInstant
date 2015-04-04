@@ -149,7 +149,8 @@ def products():
     print RIDE
     return render_template(
         'demo.html',
-        token=session.get('access_token')
+        token=session.get('access_token'),
+        info=RIDE
     )
 
 
@@ -165,9 +166,7 @@ def time():
     url = config.get('base_uber_url') + 'estimates/time'
     params = {
         'start_latitude': config.get('start_latitude'),
-        'start_longitude': config.get('start_longitude'),
-        'end_latitude': LOC[0],
-        'end_longitude': LOC[1]
+        'start_longitude': config.get('start_longitude')
     }
 
     response = app.requests_session.get(
@@ -180,7 +179,8 @@ def time():
         return 'There was an error', response.status_code
     return render_template(
         'demo.html',
-        token=session.get('access_token')
+        token=session.get('access_token'),
+        info=response.text
     )
 
 
