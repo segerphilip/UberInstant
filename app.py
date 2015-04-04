@@ -197,7 +197,7 @@ def time():
     return render_template(
         'demo.html',
         token=session.get('access_token'),
-        info=TIME
+        info='The time until arrival is about: ' + str(TIME) + ' minutes(s)'
     )
 
 
@@ -248,6 +248,7 @@ def price():
         'demo.html',
         token=session.get('access_token'),
         info=ESTIMATE
+        #info='The estimated price is about $' + str(ESTIMATE)
     )
 
 # not sure why this breaks everything when uncommented
