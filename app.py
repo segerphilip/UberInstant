@@ -22,6 +22,7 @@ sslify = SSLify(app)
 # global used for ride id, so we can track requests with request-details tag
 RIDE = ''
 CAR = ['uberX' , 'uberXL', 'UberSUV', 'UberBLACK']
+LOC = ''
 
 def pick_car():
     # some serial in code, for now just going to hardcode for testing
@@ -29,10 +30,8 @@ def pick_car():
 
 def get_loc():
     sr = SpeechRecog()
-    print sr.speechToCoord()
     return sr.speechToCoord()
 
-# LOC = get_loc()
 
 with open('config.json') as f:
     config = json.load(f)
@@ -152,11 +151,6 @@ def products():
         'demo.html',
         token=session.get('access_token')
     )
-    # return render_template(
-    #     'results.html',
-    #     endpoint='products',
-    #     data=response.text,
-    # )
 
 
 @app.route('/time', methods=['GET'])
@@ -165,10 +159,15 @@ def time():
 
     Returns the time estimates from the given lat/lng given below.
     """
+    LOC = get_loc()
+    print LOC
+
     url = config.get('base_uber_url') + 'estimates/time'
     params = {
         'start_latitude': config.get('start_latitude'),
         'start_longitude': config.get('start_longitude'),
+        'end_latitude': LOC[0],
+        'end_longitude': LOC[1]
     }
 
     response = app.requests_session.get(
@@ -177,15 +176,11 @@ def time():
         params=params,
     )
 
-    location = get_loc()
-    print location
-
     if response.status_code != 200:
         return 'There was an error', response.status_code
     return render_template(
-        'results.html',
-        endpoint='time',
-        data=response.text,
+        'demo.html',
+        token=session.get('access_token')
     )
 
 
