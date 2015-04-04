@@ -23,8 +23,10 @@ sslify = SSLify(app)
 RIDE = ''
 CAR = ['uberX' , 'uberXL', 'UberSUV', 'UberBLACK']
 LOC = ''
+TIME = ''
 
 def pick_car():
+    global CAR
     # some serial in code, for now just going to hardcode for testing
     return CAR[0]
 
@@ -118,6 +120,7 @@ def products():
 
     Returns all the products currently available in San Francisco.
     """
+    global RIDE
     url = config.get('base_uber_url') + 'products'
     params = {
         'latitude': config.get('start_latitude'),
@@ -146,7 +149,6 @@ def products():
             return render_template(
                 'error.html'
             )
-    print RIDE
     return render_template(
         'demo.html',
         token=session.get('access_token'),
@@ -160,9 +162,7 @@ def time():
 
     Returns the time estimates from the given lat/lng given below.
     """
-    LOC = get_loc()
-    print LOC
-
+    global TIME
     url = config.get('base_uber_url') + 'estimates/time'
     params = {
         'start_latitude': config.get('start_latitude'),
@@ -177,10 +177,25 @@ def time():
 
     if response.status_code != 200:
         return 'There was an error', response.status_code
+    # find specific car by id in list
+    newRide = json.loads(response.text)
+    i = 0
+    while True:
+        try:
+            if newRide['times'][i]['product_id'] != RIDE:
+                print 'nope'
+                i = i + 1
+            else:
+                TIME = newRide['times'][i]['estimate']
+                break
+        except:
+            return render_template(
+                'error.html'
+            )
     return render_template(
         'demo.html',
         token=session.get('access_token'),
-        info=response.text
+        info=TIME
     )
 
 
