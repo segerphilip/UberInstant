@@ -55,6 +55,20 @@ for ride in all_rides:
         display_name = ride['display_name']
         price_estimate = ride['high_estimate']
 #s.write("Olin College\nNeedham&")
+
+tmp = 0
+for i in xrange(output.count(' ')):
+    tmp_old = tmp
+    tmp = output.find(' ', tmp+1);
+    if 12 < tmp < 17:
+        output = output[:tmp] + '\n' + output[tmp+1:]
+        break
+    elif tmp > 17:
+        output = output[:tmp_old] + '\n' + output[tmp_old+1:]
+        break
+
+output = output[:26]
+
 s.write(str(output))
 sleep(1)
 s.write(str(price_estimate).zfill(2))
