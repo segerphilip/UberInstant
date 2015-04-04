@@ -10,6 +10,9 @@ from flask_sslify import SSLify
 from rauth import OAuth2Service
 import requests
 
+# speech recognition
+import SpeechRecog
+
 app = Flask(__name__, static_folder='static', static_url_path='')
 app.requests_session = requests.Session()
 app.secret_key = os.urandom(24)
@@ -23,6 +26,10 @@ CAR = ['uberX' , 'uberXL', 'UberSUV', 'UberBLACK']
 def pick_car():
     # some serial in code, for now just going to hardcode for testing
     return CAR[0]
+
+def get_loc():
+    sr = SpeechRecog()
+    return sr.speechToCoord()
 
 with open('config.json') as f:
     config = json.load(f)
