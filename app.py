@@ -124,12 +124,19 @@ def products():
     print RIDE['products'][i]['display_name']
     print CAR
     while True:
-        if RIDE['products'][i]['display_name'] != CAR:
-            print RIDE['products'][i]['display_name']
-            i = i + 1
-        else:
-            RIDE = RIDE['products'][0]['product_id']
-            break
+        try:
+            if RIDE['products'][i]['display_name'] != CAR:
+                print RIDE['products'][i]['display_name']
+                i = i + 1
+            else:
+                RIDE = RIDE['products'][i]['product_id']
+                break
+        except ValueError:
+            return render_template(
+                'results.html',
+                endpoint='products',
+                data=response.text,
+            )
     print RIDE
     return render_template(
         'results.html',
