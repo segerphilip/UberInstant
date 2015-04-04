@@ -76,7 +76,7 @@ class SpeechRecog():
         try:
             output = r.recognize(audio)
             (lat, lon) = self.get_lat_long(output)
-            return (lat, lon)
+            return (lat, lon, output)
         except KeyError:                                    # the API key didn't work
             return (0, 0)
         except LookupError:                                 # speech is unintelligible

@@ -76,7 +76,7 @@ void loop()
     // Restart Button (4)
     if(analogRead(buttons[3]) < 400 )
     {
-        Serial.println("STOP");
+        //Serial.println("STOP");
         Screen_Initiate();
         waiting_time = 0;
         waiting_init = 0;
