@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import json
+import unicodedata
 import os
 from urlparse import urlparse
 
@@ -117,8 +118,8 @@ def products():
 
     if response.status_code != 200:
         return 'There was an error', response.status_code
-    RIDE = unicode(response.text, 'utf-8')
-    RIDE = RIDE.json.loads(['products']['product_id'])
+    RIDE = json.loads(response.text)
+    RIDE = RIDE['products'][0]['product_id']
     print RIDE
     return render_template(
         'results.html',

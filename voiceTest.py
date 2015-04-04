@@ -13,6 +13,7 @@ def get_json(url):
     """
     f = urllib2.urlopen(url)
     response_text = f.read()
+    print type(response_text)
     return json.loads(response_text)
 
 
