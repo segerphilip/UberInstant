@@ -32,8 +32,10 @@ int waiting_init = 0, waiting_time = 0;
 int draw_info_init = 0;
 String dest;
 int car;
-String timer = "", price = "";
+String timer = "", price = "", content = "";
 char tmp, tmp2;
+int get_car = 1;
+int waiting_price = 0;
 
 void setup()
 {
@@ -55,63 +57,83 @@ void setup()
 
 void loop()
 {
-    for( i = 0; i < 4; ++i)
+
+    // Check input buttons (1,2,3)
+    if ( get_car )
     {
-        //Serial.print(analogRead(buttons[i]));
-        if ( waiting_time == 0 && analogRead(buttons[i]) < 400 && i != 3)
+        for (i = 0; i < 3; ++i)
         {
-            Serial.println(i);
-            car = i;
-            waiting_init = 1;
-        }
-        else if( i == 3 && analogRead(buttons[i]) < 400 )
-        {
-            Serial.println("STOP");
-            Screen_Initiate();
-            waiting_time = 0;
-            waiting_init = 1;
+            if (analogRead(buttons[i]) < 400 )
+            {
+                Serial.println(i);
+                car = i;
+                get_car = 0;
+                waiting_init = 1;
+            }
         }
     }
-    if (waiting_init == 1)
+
+    // Restart Button (4)
+    if(analogRead(buttons[3]) < 400 )
     {
-        String content = "";
+        Serial.println("STOP");
+        Screen_Initiate();
+        waiting_time = 0;
+        waiting_init = 0;
+        get_car = 1;
+    }
+
+    // Get initial information
+    if (waiting_init)
+    {
+        content = "";
         char character;
         int number;
-        while( Serial.available())
+        while(Serial.available())
         {
             character = Serial.read();
-            if ( character != '&' )
-            {
-                content.concat(character);
+            if ( character == '&' )
+            {   
+                break;
             }
-            else
-            {
-                tmp = Serial.read();
-                tmp2 = Serial.read();
-                price.concat(tmp);
-                price.concat(tmp2);
-                tmp = Serial.read();
-                tmp2 = Serial.read();
-                timer.concat(tmp);
-                timer.concat(tmp2);
-            }
+            content.concat(character);
             delay(1);
-
         }
+
         if (content != ""){
-            Draw_Destination(content, car, timer, price);
             waiting_init = 0;
+            waiting_price = 1;
+        }
+    }
+
+    // Update display with price
+    if (waiting_price)
+    {
+        price = "";
+        while(Serial.available())
+        {
+            tmp = Serial.read();
+            price.concat(tmp);
+            delay(1);
+        }
+        if (price != ""){
+            Draw_Destination(content, car, "00", price);
+            waiting_price = 0;
             waiting_time = 1;
         }
     }
-    if (waiting_time == 1)
+
+    // Update the time on the display
+    if (waiting_time)
     {
-        if( Serial.available())
+        String timer = "";
+        while( Serial.available())
         {
             tmp = Serial.read();
-            tmp2 = Serial.read();   
-            Update_Time(tmp,tmp2);
+            timer.concat(tmp);
+            delay(1);
         }
+        if (timer != "") Update_Time(timer);
     }
 }
 
@@ -157,13 +179,12 @@ void Draw_Destination(String dest, int car, String timer, String price)
     tft.setTextColor(WHITE);
 }
 
-void Update_Time(char tmp, char tmp2)
+void Update_Time(String timer)
 {
     tft.fillRect(0, 130, 320, 480, BLACK);
     tft.setCursor(50,160);
     tft.setTextSize(20);
-    tft.print(tmp);
-    tft.print(tmp2);
+    tft.print(timer);
 
     // Minutes
     tft.setCursor(300, 230);
@@ -175,9 +196,11 @@ void Screen_Initiate( void )
 {
     tft.setRotation(1);
     tft.fillScreen(BLACK);
-    tft.setTextColor(WHITE); tft.setTextSize(20);
+    tft.setTextColor(WHITE); tft.setTextSize(10);
     
-    tft.setCursor(0,0);
-    tft.println("Uber\nInstant");
+    tft.setCursor(0,50);
+    tft.println("Uber");
+    tft.setCursor(0, 160);
+    tft.println("Instant");
 }
 
