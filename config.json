@@ -7,8 +7,6 @@
     "base_uber_url": "https://api.uber.com/v1/",
     "base_uber_url_v1_1" : "https://api.uber.com/v1.1/",
     "sandbox_uber_url" : "https://sandbox-api.ubser.com/v2/",
-    "start_latitude": "37.789654",
-    "start_longitude": "-122.420498",
-    "end_latitude": "37.790214",
-    "end_longitude": "-122.415541"
+    "start_latitude": "42.257491",
+    "start_longitude": "-72.573838"
 }

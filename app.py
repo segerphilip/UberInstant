@@ -18,6 +18,11 @@ sslify = SSLify(app)
 
 # global used for ride id, so we can track requests with request-details tag
 RIDE = ''
+CAR = ['uberX' , 'uberXL', 'UberSUV', 'UberBLACK']
+
+def pick_car():
+    # some serial in code, for now just going to hardcode for testing
+    return CAR[0]
 
 with open('config.json') as f:
     config = json.load(f)
@@ -119,13 +124,29 @@ def products():
     if response.status_code != 200:
         return 'There was an error', response.status_code
     RIDE = json.loads(response.text)
-    RIDE = RIDE['products'][0]['product_id']
+    i = 0
+    CAR = pick_car()
+    while True:
+        try:
+            if RIDE['products'][i]['display_name'] != CAR:
+                i = i + 1
+            else:
+                RIDE = RIDE['products'][i]['product_id']
+                break
+        except:
+            return render_template(
+                'error.html'
+            )
     print RIDE
     return render_template(
-        'results.html',
-        endpoint='products',
-        data=response.text,
+        'demo.html',
+        token=session.get('access_token')
     )
+    # return render_template(
+    #     'results.html',
+    #     endpoint='products',
+    #     data=response.text,
+    # )
 
 
 @app.route('/time', methods=['GET'])
