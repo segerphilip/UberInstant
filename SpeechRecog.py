@@ -29,7 +29,7 @@ class SpeechRecog():
         """
         url = "https://maps.googleapis.com/maps/api/geocode/json?address=%s" %(place_name.replace(" ","%20"))
         api_res = self.get_json(url)
-        return (api_res['results'][0]['geometry']['location']['lat'],api_res['results'][0]['geometry']['location']['lng'])
+        return (api_res['results'][0]['geometry']['location']['lat'],api_res['results'][0]['geometry']['location']['lng'])  #return lat and long as tuple
 
     def record(self):
         """ Records wav audio file for later speech recognition processing """
@@ -76,11 +76,12 @@ class SpeechRecog():
         try:
             output = r.recognize(audio)
             (lat, lon) = self.get_lat_long(output)
-            return (lat, lon)
+            return (lat, lon, output)
         except KeyError:                                    # the API key didn't work
             return (0, 0)
         except LookupError:                                 # speech is unintelligible
             return (0, 0)
+
 
 # if __name__ == '__main__':
     # record()
