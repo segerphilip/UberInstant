@@ -247,7 +247,7 @@ def price():
     return render_template(
         'demo.html',
         token=session.get('access_token'),
-        info=ESTIMATE
+        info='This ride will cost about $' + str(ESTIMATE) 
         #info='The estimated price is about $' + str(ESTIMATE)
     )
 
