@@ -28,7 +28,7 @@ uint16_t getColor(uint8_t red, uint8_t green, uint8_t blue)
 /* GENERAL VARIABLE DEFINITIONS */
 int i;
 byte buttons[] = {A2, A3, A0, A1};
-int waiting_init = 0;
+int waiting_init = 0, waiting_time = 0;
 int draw_info_init = 0;
 String dest;
 int car;
@@ -58,7 +58,7 @@ void loop()
     for( i = 0; i < 4; ++i)
     {
         //Serial.print(analogRead(buttons[i]));
-        if ( !waiting_init && analogRead(buttons[i]) < 400 && i != 3)
+        if ( waiting_time == 0 && analogRead(buttons[i]) < 400 && i != 3)
         {
             Serial.println(i);
             car = i;
@@ -67,10 +67,12 @@ void loop()
         else if( i == 3 && analogRead(buttons[i]) < 400 )
         {
             Serial.println("STOP");
-            waiting_init = 0;
+            Screen_Initiate();
+            waiting_time = 0;
+            waiting_init = 1;
         }
     }
-    if (waiting_init)
+    if (waiting_init == 1)
     {
         String content = "";
         char character;
@@ -93,10 +95,23 @@ void loop()
                 timer.concat(tmp);
                 timer.concat(tmp2);
             }
+            delay(1);
 
         }
-        Draw_Destination(content, car, timer, price);
-        waiting_init = 0;
+        if (content != ""){
+            Draw_Destination(content, car, timer, price);
+            waiting_init = 0;
+            waiting_time = 1;
+        }
+    }
+    if (waiting_time == 1)
+    {
+        if( Serial.available())
+        {
+            tmp = Serial.read();
+            tmp2 = Serial.read();   
+            Update_Time(tmp,tmp2);
+        }
     }
 }
 
@@ -142,8 +157,18 @@ void Draw_Destination(String dest, int car, String timer, String price)
     tft.setTextColor(WHITE);
 }
 
-void Update_Time(int timer)
+void Update_Time(char tmp, char tmp2)
 {
+    tft.fillRect(0, 130, 320, 480, BLACK);
+    tft.setCursor(50,160);
+    tft.setTextSize(20);
+    tft.print(tmp);
+    tft.print(tmp2);
+
+    // Minutes
+    tft.setCursor(300, 230);
+    tft.setTextSize(10);
+    tft.println("MIN");
 }
 
 void Screen_Initiate( void )
