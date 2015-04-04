@@ -180,47 +180,6 @@ def price():
     )
 
 
-@app.route('/history', methods=['GET'])
-def history():
-    """Return the last 5 trips made by the logged in user."""
-    url = config.get('base_uber_url_v1_1') + 'history'
-    params = {
-        'offset': 0,
-        'limit': 5,
-    }
-
-    response = app.requests_session.get(
-        url,
-        headers=generate_ride_headers(session.get('access_token')),
-        params=params,
-    )
-
-    if response.status_code != 200:
-        return 'There was an error', response.status_code
-    return render_template(
-        'results.html',
-        endpoint='history',
-        data=response.text,
-    )
-
-
-@app.route('/me', methods=['GET'])
-def me():
-    """Return user information including name, picture and email."""
-    url = config.get('base_uber_url') + 'me'
-    response = app.requests_session.get(
-        url,
-        headers=generate_ride_headers(session.get('access_token')),
-    )
-
-    if response.status_code != 200:
-        return 'There was an error', response.status_code
-    return render_template(
-        'results.html',
-        endpoint='me',
-        data=response.text,
-    )
-
 # @app.route('/request', methods=['GET'])
 # def request():
 #     """Call a car."""
