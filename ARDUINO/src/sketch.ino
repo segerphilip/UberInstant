@@ -28,6 +28,7 @@ uint16_t getColor(uint8_t red, uint8_t green, uint8_t blue)
 /* GENERAL VARIABLE DEFINITIONS */
 int i;
 byte buttons[] = {A0, A1, A2, A3};
+int waiting_comp = 0;
 
 void setup()
 {
@@ -38,7 +39,6 @@ void setup()
     pinMode(A1, INPUT_PULLUP); // 3               
     pinMode(A2, INPUT_PULLUP); // 4               
     pinMode(A3, INPUT_PULLUP); // 1               
-    pinMode(A5, OUTPUT);
 
     tft.reset();
     uint16_t identifier = tft.readID();
@@ -52,17 +52,41 @@ void loop()
 {
     for( i = 0; i < 4; ++i)
     {
-        Serial.print(analogRead(buttons[i]));
-        if (analogRead(buttons[i]) < 400)
+        //Serial.print(analogRead(buttons[i]));
+        if ( !waiting_comp && analogRead(buttons[i]) < 400 && i < 3)
         {
-            digitalWrite(A5, HIGH);
-            delay(200);
-            Screen_Initiate();
-        }   
-        Serial.print(' ');
+            Serial.println(i);
+            waiting_comp = 1;
+        }
+        else if (analogRead(buttons[i] < 400))
+        {
+            Serial.println("STOP");
+            waiting_comp = 0;
+        }
     }
-    Serial.println(' '); 
-    delay(1000);
+    if (waiting_comp)
+    {
+        String content = "";
+        char character;
+        while( Serial.available())
+        {
+            character = Serial.read();
+            content.concat(character);
+        }
+        if (content != "")
+        {
+            Serial.println(content);
+        }
+    }
+
+}
+
+void Update_Destination(String dest)
+{
+}
+
+void Update_Time(int timer)
+{
 }
 
 void Screen_Initiate( void )
