@@ -135,14 +135,18 @@ def products():
                 break
         except:
             return render_template(
-                'error.html',
+                'error.html'
             )
     print RIDE
     return render_template(
-        'results.html',
-        endpoint='products',
-        data=response.text,
+        'demo.html',
+        token=session.get('access_token')
     )
+    # return render_template(
+    #     'results.html',
+    #     endpoint='products',
+    #     data=response.text,
+    # )
 
 
 @app.route('/time', methods=['GET'])
