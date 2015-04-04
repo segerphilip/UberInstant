@@ -15,6 +15,9 @@ app.secret_key = os.urandom(24)
 
 sslify = SSLify(app)
 
+# global used for ride id, so we can track requests with request-details tag
+RIDE = ''
+
 with open('config.json') as f:
     config = json.load(f)
 
@@ -114,6 +117,9 @@ def products():
 
     if response.status_code != 200:
         return 'There was an error', response.status_code
+    RIDE = unicode(response.text, 'utf-8')
+    RIDE = RIDE.json.loads(['products']['product_id'])
+    print RIDE
     return render_template(
         'results.html',
         endpoint='products',
@@ -177,34 +183,27 @@ def price():
     )
 
 
-@app.route('/history', methods=['GET'])
-def history():
-    """Return the last 5 trips made by the logged in user."""
-    url = config.get('base_uber_url_v1_1') + 'history'
-    params = {
-        'offset': 0,
-        'limit': 5,
-    }
+# @app.route('/request', methods=['GET'])
+# def request():
+#     """Call a car."""
+#     url = config.get('sandbox_uber_url') + 'request'
+#     response = app.requests_session.get(
+#         url,
+#         headers=generate_ride_headers(session.get('access_token')),
+#     )
 
-    response = app.requests_session.get(
-        url,
-        headers=generate_ride_headers(session.get('access_token')),
-        params=params,
-    )
+#     if response.status_code != 200:
+#         return 'There was an error', response.status_code
+#     return render_template(
+#         'results.html',
+#         endpoint='request',
+#         data=response.text,
+#     )
 
-    if response.status_code != 200:
-        return 'There was an error', response.status_code
-    return render_template(
-        'results.html',
-        endpoint='history',
-        data=response.text,
-    )
-
-
-@app.route('/me', methods=['GET'])
-def me():
-    """Return user information including name, picture and email."""
-    url = config.get('base_uber_url') + 'me'
+@app.route('/cancel', methods=['GET'])
+def cancel():
+    """Cancel a currently called uber product."""
+    url = config.get('sandbox_uber_url') + 'cancel'
     response = app.requests_session.get(
         url,
         headers=generate_ride_headers(session.get('access_token')),
@@ -214,10 +213,9 @@ def me():
         return 'There was an error', response.status_code
     return render_template(
         'results.html',
-        endpoint='me',
+        endpoint='cancel',
         data=response.text,
     )
-
 
 def get_redirect_uri(request):
     """Return OAuth redirect URI."""
