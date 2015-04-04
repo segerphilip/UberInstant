@@ -24,6 +24,7 @@ RIDE = ''
 CAR = ['uberX' , 'uberXL', 'UberSUV', 'UberBLACK']
 LOC = ''
 TIME = ''
+ESTIMATE = ''
 
 def pick_car():
     global CAR
@@ -186,7 +187,7 @@ def time():
                 print 'nope'
                 i = i + 1
             else:
-                TIME = newRide['times'][i]['estimate']
+                TIME = newRide['times'][i]['estimate'] / 60
                 break
         except:
             return render_template(
@@ -205,12 +206,18 @@ def price():
 
     Returns the time estimates from the given lat/lng given below.
     """
+    global LOC
+    global ESTIMATE
+
+    LOC = get_loc()
+    print LOC
+
     url = config.get('base_uber_url') + 'estimates/price'
     params = {
         'start_latitude': config.get('start_latitude'),
         'start_longitude': config.get('start_longitude'),
-        'end_latitude': config.get('end_latitude'),
-        'end_longitude': config.get('end_longitude'),
+        'end_latitude': LOC[0],
+        'end_longitude': LOC[1]
     }
 
     response = app.requests_session.get(
@@ -221,10 +228,24 @@ def price():
 
     if response.status_code != 200:
         return 'There was an error', response.status_code
+    estimate = json.loads(response.text)
+    i = 0
+    while True:
+        try:
+            if estimate['prices'][i]['product_id'] != RIDE:
+                print 'nope'
+                i = i + 1
+            else:
+                ESTIMATE = estimate['prices'][i]['estimate']
+                break
+        except:
+            return render_template(
+                'error.html'
+            )
     return render_template(
-        'results.html',
-        endpoint='price',
-        data=response.text,
+        'demo.html',
+        token=session.get('access_token'),
+        info=ESTIMATE
     )
 
 
