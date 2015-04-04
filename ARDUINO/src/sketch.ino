@@ -28,10 +28,12 @@ uint16_t getColor(uint8_t red, uint8_t green, uint8_t blue)
 /* GENERAL VARIABLE DEFINITIONS */
 int i;
 byte buttons[] = {A2, A3, A0, A1};
-int waiting_comp = 0;
+int waiting_init = 0;
 int draw_info_init = 0;
 String dest;
-int car = 0, timer = 0, price = 0;
+int car;
+String timer = "", price = "";
+char tmp, tmp2;
 
 void setup()
 {
@@ -56,51 +58,49 @@ void loop()
     for( i = 0; i < 4; ++i)
     {
         //Serial.print(analogRead(buttons[i]));
-        if ( !waiting_comp && analogRead(buttons[i]) < 400 && i != 3)
+        if ( !waiting_init && analogRead(buttons[i]) < 400 && i != 3)
         {
             Serial.println(i);
-            waiting_comp = 1;
+            car = i;
+            waiting_init = 1;
         }
         else if( i == 3 && analogRead(buttons[i]) < 400 )
         {
             Serial.println("STOP");
-            waiting_comp = 0;
+            waiting_init = 0;
         }
     }
-    if (waiting_comp)
+    if (waiting_init)
     {
         String content = "";
         char character;
         int number;
-        int stringer = 1;
         while( Serial.available())
         {
-            if (stringer = 1){
-                character = Serial.read();
-                if ( character != '&' )
-                {
-                    content.concat(character);
-                }
-                else
-                {
-                    stringer = 0; 
-                    Serial.println("CONTAINS KILLER");
-                }
+            character = Serial.read();
+            if ( character != '&' )
+            {
+                content.concat(character);
             }
-            //car = Serial.read();
-            //timer = Serial.read();
-            //price = Serial.read();
+            else
+            {
+                tmp = Serial.read();
+                tmp2 = Serial.read();
+                price.concat(tmp);
+                price.concat(tmp2);
+                tmp = Serial.read();
+                tmp2 = Serial.read();
+                timer.concat(tmp);
+                timer.concat(tmp2);
+            }
+
         }
-        if (content != "" && draw_info_init == 0)
-        {
-            dest = content;
-            Draw_Destination(dest, car, timer, price);
-            draw_info_init = 1;
-        }
+        Draw_Destination(content, car, timer, price);
+        waiting_init = 0;
     }
 }
 
-void Draw_Destination(String dest, int car, int timer, int price)
+void Draw_Destination(String dest, int car, String timer, String price)
 {
     tft.fillScreen(BLACK);
 
@@ -112,8 +112,8 @@ void Draw_Destination(String dest, int car, int timer, int price)
     // A nice little underline
     tft.fillRect(0, 70, 250, 5, WHITE);
 
-    // Print that fuckin Time ya
-    tft.setCursor(100, 160);
+    // Timer
+    tft.setCursor(50, 160);
     tft.setTextSize(20);
     tft.println(timer);
 
@@ -123,7 +123,7 @@ void Draw_Destination(String dest, int car, int timer, int price)
     tft.println("MIN");
 
     // Car
-    tft.setCursor(330, 10);
+    tft.setCursor(10, 80);
     tft.setTextSize(5);
     switch(car)
     {
@@ -134,11 +134,12 @@ void Draw_Destination(String dest, int car, int timer, int price)
     }   
 
     // Price
-    tft.setCursor(350, 70);
+    tft.setTextColor(getColor(20,254,30));
+    tft.setCursor(320, 50);
     tft.setTextSize(8);
-    tft.println("$");
-    tft.setCursor(400, 70);
+    tft.print("$");
     tft.println(price);
+    tft.setTextColor(WHITE);
 }
 
 void Update_Time(int timer)
@@ -149,9 +150,9 @@ void Screen_Initiate( void )
 {
     tft.setRotation(1);
     tft.fillScreen(BLACK);
-    tft.setTextColor(WHITE); tft.setTextSize(6);
+    tft.setTextColor(WHITE); tft.setTextSize(20);
     
     tft.setCursor(0,0);
-    tft.println("Uber Instant");
+    tft.println("Uber\nInstant");
 }
 
