@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
-import json
-import unicodedata
+import json import unicodedata
 import os
 from urlparse import urlparse
 
@@ -28,6 +27,9 @@ sslify = SSLify(app)
 RIDE = ''
 CAR = ['uberX' , 'uberXL', 'UberSUV', 'UberBLACK']
 LOC = ''
+TIME = ''
+ESTIMATE = ''
+REQUEST = ''
 
 def pick_car():
     car = s.readline()
@@ -123,6 +125,7 @@ def products():
 
     Returns all the products currently available in San Francisco.
     """
+    global RIDE
     url = config.get('base_uber_url') + 'products'
     params = {
         'latitude': config.get('start_latitude'),
@@ -151,7 +154,6 @@ def products():
             return render_template(
                 'error.html'
             )
-    print RIDE
     return render_template(
         'demo.html',
         token=session.get('access_token'),
@@ -165,9 +167,7 @@ def time():
 
     Returns the time estimates from the given lat/lng given below.
     """
-    LOC = get_loc()
-    print LOC
-
+    global TIME
     url = config.get('base_uber_url') + 'estimates/time'
     params = {
         'start_latitude': config.get('start_latitude'),
@@ -182,10 +182,25 @@ def time():
 
     if response.status_code != 200:
         return 'There was an error', response.status_code
+    # find specific car by id in list
+    newRide = json.loads(response.text)
+    i = 0
+    while True:
+        try:
+            if newRide['times'][i]['product_id'] != RIDE:
+                print 'nope'
+                i = i + 1
+            else:
+                TIME = newRide['times'][i]['estimate'] / 60
+                break
+        except:
+            return render_template(
+                'error.html'
+            )
     return render_template(
         'demo.html',
         token=session.get('access_token'),
-        info=response.text
+        info=TIME
     )
 
 
@@ -195,13 +210,20 @@ def price():
 
     Returns the time estimates from the given lat/lng given below.
     """
+    global LOC
+    global ESTIMATE
+
+    LOC = get_loc()
+
     url = config.get('base_uber_url') + 'estimates/price'
     params = {
         'start_latitude': config.get('start_latitude'),
         'start_longitude': config.get('start_longitude'),
-        'end_latitude': config.get('end_latitude'),
-        'end_longitude': config.get('end_longitude'),
+        'end_latitude': LOC[0],
+        'end_longitude': LOC[1]
     }
+    LOC = (config.get('start_latitude'), config.get('start_longitude'),
+                LOC[0], LOC[1])
 
     response = app.requests_session.get(
         url,
@@ -211,45 +233,75 @@ def price():
 
     if response.status_code != 200:
         return 'There was an error', response.status_code
+    estimate = json.loads(response.text)
+    i = 0
+    while True:
+        try:
+            if estimate['prices'][i]['product_id'] != RIDE:
+                i = i + 1
+            else:
+                ESTIMATE = (estimate['prices'][i]['high_estimate'] + 
+                                     estimate['prices'][i]['low_estimate']) / 2
+                break
+        except:
+            return render_template(
+                'error.html'
+            )
     return render_template(
-        'results.html',
-        endpoint='price',
-        data=response.text,
+        'demo.html',
+        token=session.get('access_token'),
+        info=ESTIMATE
     )
 
-
-# @app.route('/request', methods=['GET'])
+# not sure why this breaks everything when uncommented
+# @app.route('/request', methods=['POST'])
 # def request():
 #     """Call a car."""
+#     global REQUEST
+    
 #     url = config.get('sandbox_uber_url') + 'request'
+#     params = {
+#         'product_id': RIDE,
+#         'start_latitude': LOC[0],
+#         'start_longitude': LOC[1],
+#         'end_latitude': LOC[2],
+#         'end_longitude': LOC[3] 
+#     }
 #     response = app.requests_session.get(
 #         url,
 #         headers=generate_ride_headers(session.get('access_token')),
+#         params=params
 #     )
+
+#     REQUEST = json.loads(response.text)
+#     REQUEST = ['request_id']
 
 #     if response.status_code != 200:
 #         return 'There was an error', response.status_code
 #     return render_template(
-#         'results.html',
-#         endpoint='request',
-#         data=response.text,
+#         'demo.html',
+#         token=session.get('access_token'),
+#         info=REQUEST
 #     )
 
-@app.route('/cancel', methods=['GET'])
+# should be DELETE request, though not easy in flask
+@app.route('/cancel', methods=['POST'])
 def cancel():
     """Cancel a currently called uber product."""
-    url = config.get('sandbox_uber_url') + 'cancel'
+    url = config.get('base_uber_url') + 'cancel'
+    params = {
+        request_id: REQUEST
+    }
     response = app.requests_session.get(
         url,
         headers=generate_ride_headers(session.get('access_token')),
     )
-
-    if response.status_code != 200:
+    if response.status_code != 204:
         return 'There was an error', response.status_code
     return render_template(
-        'results.html',
-        endpoint='cancel',
-        data=response.text,
+        'demo.html',
+        token=session.get('access_token'),
+        info='Cancelled'
     )
 
 def get_redirect_uri(request):
