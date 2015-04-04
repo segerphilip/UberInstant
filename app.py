@@ -117,6 +117,9 @@ def products():
 
     if response.status_code != 200:
         return 'There was an error', response.status_code
+    RIDE = unicode(response.text, 'utf-8')
+    RIDE = RIDE.json.loads(['products']['product_id'])
+    print RIDE
     return render_template(
         'results.html',
         endpoint='products',
