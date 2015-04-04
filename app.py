@@ -11,7 +11,7 @@ from rauth import OAuth2Service
 import requests
 
 # speech recognition
-import SpeechRecog
+from SpeechRecog import SpeechRecog
 
 app = Flask(__name__, static_folder='static', static_url_path='')
 app.requests_session = requests.Session()
@@ -29,7 +29,10 @@ def pick_car():
 
 def get_loc():
     sr = SpeechRecog()
+    print sr.speechToCoord()
     return sr.speechToCoord()
+
+# LOC = get_loc()
 
 with open('config.json') as f:
     config = json.load(f)
@@ -173,6 +176,9 @@ def time():
         headers=generate_ride_headers(session.get('access_token')),
         params=params,
     )
+
+    location = get_loc()
+    print location
 
     if response.status_code != 200:
         return 'There was an error', response.status_code
