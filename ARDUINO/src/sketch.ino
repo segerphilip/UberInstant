@@ -27,8 +27,11 @@ uint16_t getColor(uint8_t red, uint8_t green, uint8_t blue)
 
 /* GENERAL VARIABLE DEFINITIONS */
 int i;
-byte buttons[] = {A0, A1, A2, A3};
+byte buttons[] = {A2, A3, A0, A1};
 int waiting_comp = 0;
+int draw_info_init = 0;
+String dest;
+int car = 0, timer = 0, price = 0;
 
 void setup()
 {
@@ -53,12 +56,12 @@ void loop()
     for( i = 0; i < 4; ++i)
     {
         //Serial.print(analogRead(buttons[i]));
-        if ( !waiting_comp && analogRead(buttons[i]) < 400 && i < 3)
+        if ( !waiting_comp && analogRead(buttons[i]) < 400 && i != 3)
         {
             Serial.println(i);
             waiting_comp = 1;
         }
-        else if (analogRead(buttons[i] < 400))
+        else if( i == 3 && analogRead(buttons[i]) < 400 )
         {
             Serial.println("STOP");
             waiting_comp = 0;
@@ -68,21 +71,74 @@ void loop()
     {
         String content = "";
         char character;
+        int number;
+        int stringer = 1;
         while( Serial.available())
         {
-            character = Serial.read();
-            content.concat(character);
+            if (stringer = 1){
+                character = Serial.read();
+                if ( character != '&' )
+                {
+                    content.concat(character);
+                }
+                else
+                {
+                    stringer = 0; 
+                    Serial.println("CONTAINS KILLER");
+                }
+            }
+            //car = Serial.read();
+            //timer = Serial.read();
+            //price = Serial.read();
         }
-        if (content != "")
+        if (content != "" && draw_info_init == 0)
         {
-            Serial.println(content);
+            dest = content;
+            Draw_Destination(dest, car, timer, price);
+            draw_info_init = 1;
         }
     }
-
 }
 
-void Update_Destination(String dest)
+void Draw_Destination(String dest, int car, int timer, int price)
 {
+    tft.fillScreen(BLACK);
+
+    // Print the destination to screen
+    tft.setCursor(10,10);
+    tft.setTextSize(3);
+    tft.println(dest);
+
+    // A nice little underline
+    tft.fillRect(0, 70, 250, 5, WHITE);
+
+    // Print that fuckin Time ya
+    tft.setCursor(100, 160);
+    tft.setTextSize(20);
+    tft.println(timer);
+
+    // Minutes
+    tft.setCursor(300, 230);
+    tft.setTextSize(10);
+    tft.println("MIN");
+
+    // Car
+    tft.setCursor(330, 10);
+    tft.setTextSize(5);
+    switch(car)
+    {
+        case 0: tft.println("uberX"); break;
+        case 1: tft.println("uberXL"); break;
+        case 2: tft.println("uberBK"); break;
+        default: break;
+    }   
+
+    // Price
+    tft.setCursor(350, 70);
+    tft.setTextSize(8);
+    tft.println("$");
+    tft.setCursor(400, 70);
+    tft.println(price);
 }
 
 void Update_Time(int timer)
