@@ -13,6 +13,11 @@ import requests
 # speech recognition
 from SpeechRecog import SpeechRecog
 
+# Setting up serial
+import serial
+from time import sleep
+s = serial.Serial('/dev/ttyACM0', 9600, timeout = None)
+
 app = Flask(__name__, static_folder='static', static_url_path='')
 app.requests_session = requests.Session()
 app.secret_key = os.urandom(24)
@@ -25,8 +30,8 @@ CAR = ['uberX' , 'uberXL', 'UberSUV', 'UberBLACK']
 LOC = ''
 
 def pick_car():
-    # some serial in code, for now just going to hardcode for testing
-    return CAR[0]
+    car = s.readline()
+    return CAR[car]
 
 def get_loc():
     sr = SpeechRecog()
