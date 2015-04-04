@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
-import json import unicodedata
+import json 
+import unicodedata
 import os
 from urlparse import urlparse
 
