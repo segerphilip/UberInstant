@@ -6,8 +6,8 @@
     "name": "Sample app",
     "base_uber_url": "https://api.uber.com/v1/",
     "base_uber_url_v1_1" : "https://api.uber.com/v1.1/",
-    "start_latitude": "37.781955",
-    "start_longitude":  "-122.402367",
-    "end_latitude": "37.744352",
-    "end_longitude": "-122.416743"
+    "start_latitude": "42.257491",
+    "start_longitude": "-72.573838",
+    "end_latitude": "42.292816",
+    "end_longitude": "-71.263981"
 }
