@@ -55,6 +55,7 @@ void setup()
 
 void loop()
 {
+    // Button checking for loop
     for( i = 0; i < 4; ++i)
     {
         //Serial.print(analogRead(buttons[i]));
